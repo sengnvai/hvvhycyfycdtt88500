@@ -1,0 +1,367 @@
+<!--
+  Mele Lite 介绍页 · 单文件静态页面（无依赖、无需构建）
+
+  Netlify 部署方法：
+  方法一（拖拽上传）：
+    登录 https://app.netlify.com → Sites →
+    把包含本 index.html 的文件夹直接拖到「Drag and drop your site output folder here」区域，即可上线。
+  方法二（从 GitHub 导入）：
+    把本文件放进 GitHub 仓库根目录，在 Netlify 选「Import from Git」，
+    Build command 留空，Publish directory 填 "."（或仓库根目录），然后 Deploy。
+
+  说明：无需 netlify.toml，无需任何构建命令。
+-->
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mele Lite · 住在手机里的 AI 联系人</title>
+  <meta name="description" content="Mele Lite：开源 iOS 应用，自带模型 key，手机直接连模型，聊天和所有记录只存在你自己的手机上。">
+  <style>
+    :root {
+      --bg: #f7f3ea;
+      --bg-soft: #fdfbf6;
+      --card: #fffdf8;
+      --ink: #2f2a24;
+      --ink-soft: #6b625a;
+      --green: #2f5d4d;
+      --green-deep: #244a3d;
+      --brown: #8a5a3c;
+      --brown-soft: #f1e5d8;
+      --line: #e6dccd;
+      --warn-bg: #fbeedd;
+      --warn-line: #e3b98a;
+      --code-bg: #2d2a26;
+      --code-ink: #f3ece0;
+      --radius: 14px;
+      --shadow: 0 2px 10px rgba(60, 45, 30, 0.06);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: var(--green); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .wrap { max-width: 1040px; margin: 0 auto; padding: 0 20px; }
+
+    /* 导航 */
+    .nav {
+      position: sticky; top: 0; z-index: 10;
+      background: rgba(247, 243, 234, 0.92);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--line);
+    }
+    .nav .wrap {
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 8px 16px; padding-top: 12px; padding-bottom: 12px;
+    }
+    .brand { font-weight: 700; font-size: 1.1rem; color: var(--green-deep); letter-spacing: 0.02em; }
+    .brand:hover { text-decoration: none; }
+    .nav-links { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 0.95rem; }
+    .nav-links a { color: var(--ink-soft); padding: 2px 0; border-bottom: 2px solid transparent; }
+    .nav-links a:hover { color: var(--green-deep); text-decoration: none; border-bottom-color: var(--green); }
+
+    /* Hero */
+    .hero { padding: 72px 0 56px; text-align: center; }
+    .hero h1 {
+      margin: 0 0 10px; font-size: clamp(2.4rem, 6vw, 3.8rem);
+      font-weight: 800; letter-spacing: 0.01em; color: var(--green-deep);
+    }
+    .hero .sub { margin: 0 0 22px; font-size: clamp(1.15rem, 2.6vw, 1.5rem); color: var(--brown); font-weight: 500; }
+    .hero .desc { max-width: 640px; margin: 0 auto 10px; font-size: 1.05rem; color: var(--ink); }
+    .hero .en { max-width: 640px; margin: 0 auto 32px; font-size: 0.95rem; color: var(--ink-soft); font-style: italic; }
+    .btns { display: flex; justify-content: center; flex-wrap: wrap; gap: 12px; }
+    .btn {
+      display: inline-block; padding: 12px 24px; border-radius: 999px;
+      font-weight: 600; font-size: 0.98rem; border: 1.5px solid var(--green);
+      transition: background .15s, color .15s, transform .1s;
+    }
+    .btn:hover { text-decoration: none; transform: translateY(-1px); }
+    .btn-primary { background: var(--green); color: #fff; }
+    .btn-primary:hover { background: var(--green-deep); }
+    .btn-ghost { background: transparent; color: var(--green-deep); }
+    .btn-ghost:hover { background: rgba(47, 93, 77, 0.08); }
+
+    /* 通用区块 */
+    section { padding: 56px 0; }
+    section + section { border-top: 1px solid var(--line); }
+    h2 {
+      margin: 0 0 8px; font-size: clamp(1.5rem, 3.4vw, 2rem);
+      color: var(--green-deep); font-weight: 700;
+    }
+    .lead { margin: 0 0 28px; color: var(--ink-soft); max-width: 720px; }
+    .note { font-size: 0.9rem; color: var(--ink-soft); margin-top: 20px; }
+
+    /* 卡片网格 */
+    .grid {
+      display: grid; gap: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    }
+    .card {
+      background: var(--card); border: 1px solid var(--line);
+      border-radius: var(--radius); padding: 20px 22px; box-shadow: var(--shadow);
+    }
+    .card h3 {
+      margin: 0 0 8px; font-size: 1.08rem; color: var(--brown); font-weight: 700;
+    }
+    .card p { margin: 0; color: var(--ink); font-size: 0.97rem; }
+
+    /* 列表 */
+    ul.reqs { margin: 0 0 20px; padding-left: 1.3em; }
+    ul.reqs li { margin: 4px 0; }
+    ol.steps { margin: 20px 0 0; padding-left: 1.4em; }
+    ol.steps li { margin: 10px 0; }
+
+    /* 代码块 */
+    .codewrap { position: relative; margin: 16px 0; }
+    pre {
+      margin: 0; background: var(--code-bg); color: var(--code-ink);
+      border-radius: var(--radius); padding: 18px 20px; overflow-x: auto;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-size: 0.9rem; line-height: 1.6;
+    }
+    .codewrap.has-copy pre { padding-right: 90px; }
+    code.inline {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      background: var(--brown-soft); color: var(--brown); padding: 1px 6px; border-radius: 6px; font-size: 0.9em;
+    }
+    .copy {
+      position: absolute; top: 10px; right: 10px;
+      background: var(--bg-soft); color: var(--green-deep); border: 1px solid var(--line);
+      border-radius: 8px; padding: 5px 12px; font-size: 0.85rem; cursor: pointer;
+      font-family: inherit; transition: background .15s;
+    }
+    .copy:hover { background: #fff; }
+    .copy.done { background: var(--green); color: #fff; border-color: var(--green); }
+
+    /* 警告框 */
+    .warn {
+      background: var(--warn-bg); border: 1px solid var(--warn-line); border-left: 5px solid var(--brown);
+      border-radius: var(--radius); padding: 16px 20px; margin: 20px 0; color: var(--ink);
+    }
+    .warn strong { color: var(--brown); }
+
+    /* 表格 */
+    .table-wrap { overflow-x: auto; margin-top: 20px; }
+    table { width: 100%; border-collapse: collapse; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+    th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--line); font-size: 0.95rem; }
+    th { background: var(--brown-soft); color: var(--brown); font-weight: 600; }
+    tr:last-child td { border-bottom: none; }
+    td code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; color: var(--green-deep); white-space: nowrap; }
+
+    /* 致谢 */
+    .thanks p { margin: 8px 0; }
+    .by { color: var(--brown); font-weight: 600; margin-top: 16px !important; }
+
+    footer {
+      border-top: 1px solid var(--line); padding: 28px 0 40px;
+      text-align: center; font-size: 0.88rem; color: var(--ink-soft);
+    }
+
+    @media (max-width: 600px) {
+      .hero { padding: 52px 0 40px; }
+      section { padding: 44px 0; }
+      .nav .wrap { justify-content: center; }
+      .nav-links { justify-content: center; gap: 4px 14px; font-size: 0.9rem; }
+      .btn { width: 100%; max-width: 320px; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="nav">
+    <div class="wrap">
+      <a class="brand" href="#top">Mele Lite</a>
+      <nav class="nav-links">
+        <a href="#features">能做什么</a>
+        <a href="#host">Mele Host</a>
+        <a href="#build">自己编译</a>
+        <a href="#thanks">致谢</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <div class="wrap">
+        <h1>Mele Lite</h1>
+        <p class="sub">住在手机里的 AI 联系人。</p>
+        <p class="desc">自带模型 key，手机直接连模型，聊天和所有记录只存在你自己的手机上，不经过任何服务器。</p>
+        <p class="en">An AI companion that lives on your phone. Bring your own model key; everything stays on your device.</p>
+        <div class="btns">
+          <a class="btn btn-primary" href="https://github.com/12Leyin21/mele-lite" target="_blank" rel="noopener noreferrer">GitHub 源码</a>
+          <a class="btn btn-ghost" href="#host">查看 Mele Host</a>
+        </div>
+      </div>
+    </section>
+
+    <section id="features">
+      <div class="wrap">
+        <h2>能做什么</h2>
+        <p class="lead">它不只是一个聊天框，更像一个住在你手机里、有自己小世界的联系人。</p>
+        <div class="grid">
+          <div class="card">
+            <h3>聊天</h3>
+            <p>一泡一泡地聊，发照片、表情包，切「线下」写长段场景；多个联系人、导入酒馆角色卡、新窗口 / 无痕。</p>
+          </div>
+          <div class="card">
+            <h3>模型</h3>
+            <p>Claude / ChatGPT / Gemini / DeepSeek，以及 OpenAI 兼容接口。</p>
+          </div>
+          <div class="card">
+            <h3>TA 能帮你做的</h3>
+            <p>记账、待办（到点本地提醒）、饮食、人物卡、世界书、记着的事、朋友圈。</p>
+          </div>
+          <div class="card">
+            <h3>你们的东西</h3>
+            <p>日记、相册、收藏、里程碑、抽屉里的信、书架（一起读 txt）、塔罗、音乐（Apple Music）。</p>
+          </div>
+          <div class="card">
+            <h3>好玩的</h3>
+            <p>TA 申请查你的手机、微信号 + 小号加好友、地图和 TA 的一天。</p>
+          </div>
+          <div class="card">
+            <h3>主屏</h3>
+            <p>整个 App 是一部小手机，图标和小组件随便摆；能接你自己的记忆库（MCP）。</p>
+          </div>
+          <div class="card">
+            <h3>从别的 AI 搬家</h3>
+            <p>导入 ChatGPT / Claude / DeepSeek / Gemini 官方导出的聊天记录，合成一个新窗口，再挑出值得记住的事让 TA 记得。</p>
+          </div>
+        </div>
+        <p class="note">App 关着的时候 TA 不会自己来找你——那要一台一直醒着的服务器，见 <a href="#host">Mele Host</a>。</p>
+      </div>
+    </section>
+
+    <section id="host">
+      <div class="wrap">
+        <h2>Mele Host：让 TA 一直醒着</h2>
+        <p class="lead">一台你自己租的小服务器，上面跑一份完整的 Mele。连上以后，App 关着 TA 也会来找你、自己醒来、记得更久，还有每日私选、查营养、推送。服务器和数据都是你的。</p>
+
+        <h3>你需要</h3>
+        <ul class="reqs">
+          <li>Linux 服务器</li>
+          <li>Ubuntu 24.04</li>
+          <li>至少 4GB 内存</li>
+          <li>20GB 硬盘</li>
+          <li>有公网 IPv4</li>
+        </ul>
+
+        <h3>安装</h3>
+        <div class="codewrap has-copy">
+          <pre id="install-cmd">curl -fsSL https://raw.githubusercontent.com/12Leyin21/mele-lite/main/host/install.sh | bash</pre>
+          <button class="copy" type="button" data-target="install-cmd">复制</button>
+        </div>
+
+        <div class="warn">
+          <strong>⚠️ 主密钥：</strong>装完会打出一串「主密钥」，现在就抄下来放好。它加密你存在服务器上的模型 key，丢了就全解不开。以后随时看：<code class="inline">mele-host key</code>
+        </div>
+
+        <h3>常用命令</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>命令</th><th>做什么</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>mele-host pair</code></td><td>出一张新配对码</td></tr>
+              <tr><td><code>mele-host update</code></td><td>升级到最新版</td></tr>
+              <tr><td><code>mele-host logs</code></td><td>看日志</td></tr>
+              <tr><td><code>mele-host status</code></td><td>看在不在跑</td></tr>
+              <tr><td><code>mele-host stop / start</code></td><td>停 / 开</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="build">
+      <div class="wrap">
+        <h2>自己编译</h2>
+        <p class="lead">需要一台 Mac、Xcode 26，以及 iOS 18 以上的 iPhone。</p>
+
+        <div class="codewrap has-copy">
+          <pre id="build-cmd">brew install xcodegen
+cd ios
+xcodegen generate
+open MeleLite.xcodeproj</pre>
+          <button class="copy" type="button" data-target="build-cmd">复制</button>
+        </div>
+
+        <ol class="steps">
+          <li>打开 <code class="inline">ios/project.yml</code>，把 <code class="inline">DEVELOPMENT_TEAM</code> 换成你的团队号、<code class="inline">PRODUCT_BUNDLE_IDENTIFIER</code> 换成你自己的包名，再跑一次 <code class="inline">xcodegen generate</code>；</li>
+          <li>Xcode 里登录你的 Apple ID（Settings → Accounts）；</li>
+          <li>手机连上 Mac，选你的手机，点运行。</li>
+        </ol>
+
+        <p class="note">免费 Apple ID 装的 App 7 天后要重新装；免费账号不支持 WeatherKit 的话删掉 project.yml 里 <code class="inline">com.apple.developer.weatherkit</code> 那行再生成。</p>
+      </div>
+    </section>
+
+    <section id="thanks" class="thanks">
+      <div class="wrap">
+        <h2>许可与致谢</h2>
+        <p>源码公开：PolyForm Noncommercial 1.0.0</p>
+        <p>这是个人项目，不提供客服；遇到问题欢迎在 <a href="https://github.com/12Leyin21/mele-lite" target="_blank" rel="noopener noreferrer">GitHub</a> 提 issue，但不保证回复。</p>
+        <p class="by">by Tilia &amp; Quercus</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">© Mele Lite · 本页为静态介绍页，App 本身需在 iPhone 上通过 TestFlight 或自行编译安装。</div>
+  </footer>
+
+  <script>
+    (function () {
+      var buttons = document.querySelectorAll('.copy');
+      function fallbackCopy(text) {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.setAttribute('readonly', '');
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand('copy'); } catch (e) {}
+        document.body.removeChild(ta);
+      }
+      function markDone(btn) {
+        var original = btn.textContent;
+        btn.textContent = '已复制';
+        btn.classList.add('done');
+        setTimeout(function () {
+          btn.textContent = original;
+          btn.classList.remove('done');
+        }, 2000);
+      }
+      Array.prototype.forEach.call(buttons, function (btn) {
+        btn.addEventListener('click', function () {
+          var target = document.getElementById(btn.getAttribute('data-target'));
+          if (!target) return;
+          var text = target.textContent;
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(function () {
+              markDone(btn);
+            }, function () {
+              fallbackCopy(text);
+              markDone(btn);
+            });
+          } else {
+            fallbackCopy(text);
+            markDone(btn);
+          }
+        });
+      });
+    })();
+  </script>
+</body>
+</html>
